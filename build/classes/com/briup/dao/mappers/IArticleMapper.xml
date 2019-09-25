@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.briup.dao.IArticleMapper">
+
+	<!-- 热点资讯推荐  -->
+	<select id="findArticlesByClickTimes" resultMap="ArticleWithUserResult">
+			select a.id,title,content,releaseDate,clickTimes,state,summary,backgroundMusicUrl,videoUrl,pictureUrls,type,
+							account,password,nickname,gender,age,email,address,role
+			from article a left outer join user u on a.user_id = u.id
+			where a.user_id = #{param2 } order by clickTimes DESC limit 0,#{param1}
+	</select>
+	
+	<!-- <select id="findArticlesById" resultType="Article">
+			select * from article where user_id = #{param2 } and id = #{param1 }
+	</select> -->
+	
+	<resultMap type="Category" id="CategoryResult">
+			<id property="id" column="id"/>
+			<result property="name" column="name"/>
+			<result property="description" column="description]"/>
+	</resultMap>
+	<resultMap type="User" id="UserResult">
+			<id property="id" column="id"/>
+			<result property="account" column="account"/>
+			<result property="password" column="password"/>
+			<result property="nickname" column="nickname"/>
+			<result property="gender" column="gender"/>
+			<result property="age" column="age"/>
+			<result property="email" column="email"/>
+			<result property="address" column="address"/>
+			<result property="role" column="role"/>
+	</resultMap>
+	<resultMap type="Article" id="ArticleWithUserResult">
+			<id property="id" column="id"/>
+			<result property="title" column="title"/>
+			<result property="content" column="content"/>
+			<result property="releaseDate" column="releaseDate"/>
+			<result property="clickTimes" column="clickTimes"/>
+			<result property="state" column="state"/>
+			<result property="summary" column="summary"/>
+			<result property="backgroundMusicUrl" column="backgroundMusicUrl"/>
+			<result property="videoUrl" column="videoUrl"/>
+			<result property="pictureUrls" column="pictureUrls"/>
+			<result property="type" column="type"/>
+			<association property="user" resultMap="UserResult"/>
+			<association property="category" resultMap="CategoryResult"/>
+	</resultMap>
+	<!-- 跟据资讯id查询资讯信息，带上用户信息 -->
+	<select id="findArticlesById" resultMap="ArticleWithUserResult">
+			select a.id,title,content,releaseDate,clickTimes,state,summary,backgroundMusicUrl,videoUrl,pictureUrls,type,
+							account,password,nickname,gender,age,email,address,role
+			from article a left outer join user u on a.user_id = u.id
+			where user_id = #{param2 } and a.id = #{param1 }
+	</select>
+	
+	 <!-- 更新资讯点击量 -->
+	 <update id="updateArticleClickTimes">
+	 		update article
+	 		set clickTimes = #{param2 } +clickTimes
+	 		where id = #{param1 }
+	 </update>
+	  
+	 <!-- 跟据二级分类id和用户id查找资讯，带上用户信息和分类信息 -->
+	 <select id="findArticlesByCategoryIdTwo" resultMap="ArticleWithUserResult">
+	 		select a.id,title,content,releaseDate,clickTimes,state,summary,backgroundMusicUrl,videoUrl,pictureUrls,type,
+							account,password,nickname,gender,age,email,address,role,
+							c.id,c.name,c.description
+	 		from article a left outer join user u on a.user_id = u.id 
+	 					left outer join category c on a.category_id = c.id
+	 		where category_id = #{param1 } and user_id = #{param2 }
+	 </select>
+	 
+	 <!-- 查询用户发布的所有资讯，包括所有状态，按照时间倒序排序 -->
+	 <select id="findArticlesByUserId" parameterType="Long" resultMap="ArticleWithUserResult">
+	 		select a.id,title,content,releaseDate,clickTimes,state,summary,backgroundMusicUrl,videoUrl,pictureUrls,type,
+							account,password,nickname,gender,age,email,address,role,
+							c.id,c.name,c.description
+	 		from article a left outer join user u on a.user_id = u.id 
+	 					left outer join category c on a.category_id = c.id
+	 		where user_id = #{userId }
+	 		order by releaseDate DESC
+	 </select>
+	 
+	 <!-- 通过articleId改变categoryId从而更新category -->
+	 <update id="updateArticleByArticleId">
+	 		update article
+	 		set category_id = #{param2 }
+	 		where id = #{param1 }
+	 </update>
+	 
+	 <!-- 查看用户浏览记录 -->
+	 <select id="findHistoryArticles" resultMap="ArticleWithUserResult">
+	 		select a.id,title,content,releaseDate,clickTimes,state,summary,backgroundMusicUrl,videoUrl,pictureUrls,type,
+							account,password,nickname,gender,age,email,address,role,
+							c.id,c.name,c.description 
+	 		from article a left outer join user u on a.user_id = u.id 
+	 					left outer join category c on a.category_id = c.id
+	 		where a.user_id = #{param2 } and a.id in ( #{param1} )
+	 </select>
+	  <!-- <delete id="delete" parameterType="Integer[]">
+	 		delete
+	 		from ssm.t_customer
+	 		<where>
+	 				id
+	 				<foreach collection="array" item="id" open="in (" close=")" separator=",">
+	 						#{id}
+	 				</foreach>
+	 		</where>
+	 </delete> -->
+	 
+	 <!-- 查找用户点赞资讯 -->
+	 <select id="findLikeArticlesByUserId" parameterType="long" resultMap="ArticleWithUserResult">
+	 			select a.id,title,content,releaseDate,clickTimes,a.state,summary,backgroundMusicUrl,videoUrl,pictureUrls,type,
+							account,password,nickname,gender,age,email,address,role,
+							c.id,c.name,c.description
+	 		from article a left outer join user u on a.user_id = u.id 
+	 					left outer join category c on a.category_id = c.id
+	 					left outer join user_likes ul on ul.article_id = a.id
+	 		where ul.user_id = #{userId }
+	 		order by releaseDate DESC
+	 </select>
+	 
+	 <!-- 查询用户收藏的的所有文章，按照时间倒序排序 -->
+	 <select id="findCollectionArticlesByUserId" parameterType="long" resultMap="ArticleWithUserResult">
+	 		select a.id,title,content,releaseDate,clickTimes,a.state,summary,backgroundMusicUrl,videoUrl,pictureUrls,type,
+							account,password,nickname,gender,age,email,address,role,
+							c.id,c.name,c.description
+	 		from article a left outer join user u on a.user_id = u.id 
+	 					left outer join category c on a.category_id = c.id
+	 					left outer join user_collection uc on uc.article_id = a.id
+	 		where uc.user_id = #{userId }
+	 		order by releaseDate DESC
+	 </select>
+	 
+	 <!-- 查询用户举报的的所有资讯，按照时间倒序排序 -->
+	 <select id="findReportArticlesByUserId" parameterType="long" resultMap="ArticleWithUserResult">
+	 		select a.id,title,content,releaseDate,clickTimes,a.state,summary,backgroundMusicUrl,videoUrl,pictureUrls,type,
+							account,password,nickname,gender,age,email,address,role,
+							c.id,c.name,c.description
+	 		from article a left outer join user u on a.user_id = u.id 
+	 					left outer join category c on a.category_id = c.id
+	 					left outer join user_report ur on ur.article_id = a.id
+	 		where ur.user_id = #{userId }
+	 		order by releaseDate DESC
+	 </select>
+	 
+	 
+	 
+	 
+	 
+	 
+	
+</mapper>

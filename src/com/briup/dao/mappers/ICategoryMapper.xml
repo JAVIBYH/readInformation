@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.briup.dao.ICategoryMapper">
+
+	<!-- 查询所有菜单 -->
+	<!-- <resultMap type="com.briup.bean.Category" id="CategoryResult">
+			<id column="id" property="id"/>
+			<result column="name" property="name"/>
+			<result column="description" property="description"/>
+			<collection property="subCategorys" ofType="com.briup.bean.Category">
+					<id property="id" column="id"/>
+					<result property="name" column="name"/>
+					<result property="description" column="description"/>
+			 </collection>
+	</resultMap>
+	<select id="findAllCategory" parameterType="int" resultMap="CategoryResult">
+			select c1.* from category c1,category c2 where c1.parent_id is null and c2.parent_id = c1.id 
+	</select> -->
+	
+	<!-- 查询所有一级菜单 -->
+	<select id="findAllOneCategory" resultType="Category">
+		select id,name,description
+		from category
+		where parent_id is null
+	</select>
+
+	<!-- 查询所有二级菜单 -->
+	<select id="findAllTwoCategory" parameterType="Long" resultType="Category">
+		select id,name,description,parent_id
+		from category
+		where parent_id=#{id }
+	</select>
+	 
+	 
+	
+</mapper>

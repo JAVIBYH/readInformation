@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.briup.dao.IUserMapper">
+
+	
+	<resultMap type="User" id="UserResult">
+		<id column="id" property="id"></id>
+		<result column="account" property="account"/>
+		<result column="password" property="password"/>
+		<result column="nickname" property="nickname"/>
+		<result column="gender" property="gender"/>
+		<result column="age" property="age"/>
+		<result column="email" property="email"/>
+		<result column="address" property="address"/>
+		<result column="role" property="role"/>
+		<result column="portraitUrl" property="portraitUrl"/>
+		<result column="third_id" property="thirdId"/>
+	</resultMap>
+	
+	<!-- 根据用户账户查询用户 -->
+	<select id="findUserByAccount" parameterType="String" resultMap="UserResult">
+		select * from user where account = #{account}
+	</select>
+	
+	<!-- 添加用户 -->
+	<select id="insertUser" parameterType="User">
+		insert into user(account,password) values(#{account},#{password})
+	</select>
+	
+ 
+	
+	<!-- 以下三个为第三方登录需要，直接提供好 -->
+	<select id="findUserByThirdId" parameterType="String" resultMap="UserResult">
+		select *
+		from user
+		where third_id=#{tid}
+	</select>
+	
+	<update id="updateName" parameterType="User">
+		update user
+		set nickname=#{nickname}
+		where id=#{id}
+	</update>
+	
+	<insert id="insertUserThird" parameterType="User">
+		insert into user(nickname,third_id)
+		values(#{nickname},#{thirdId})
+	</insert>
+	
+</mapper>
